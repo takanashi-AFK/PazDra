@@ -21,6 +21,8 @@ private:
 		HEART,
 		NUM
 	};
+
+
 	struct BALLINFO {
 		COLOR color;
 		float x, y; // ‹Ê‚Ì•\¦À•W
@@ -32,6 +34,8 @@ private:
 #endif
 		int doErase; // Á‚·‘ÎÛ
 	};
+
+
 	static const int WIDTH = 6;
 	static const int HEIGHT = 5;
 	BALLINFO field[HEIGHT][WIDTH];
@@ -39,6 +43,8 @@ private:
 	XMFLOAT3 mousePos;
 	int selectX, selectY; // ‘I‚Î‚ê‚½êŠ
 	COLOR selectColor;
+
+	int eraseTime;//Á‚·ŠÔ
 
 	// dottozahyou kara 3dzahyou ni hennkann
 	XMFLOAT3 ConvDrawPos(float x, float y);
@@ -85,4 +91,9 @@ private:
 	/// </summary>
 	/// <returns>Á‚¦‚é‚Ì‚ª‚ ‚Á‚½‚çtrue</returns>
 	bool CheckErase();
+
+	/// <summary>
+	/// —‚¿‚é€”õ
+	/// </summary>
+	void PrepareFall();
 };

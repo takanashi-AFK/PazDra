@@ -150,6 +150,7 @@ void Stage::UpdateMove()
 	}
 	if (Input::IsMouseButtonUp(0)) { // 左クリック
 		if (CheckErase()) {
+			eraseTime = 30;
 			state = STATE::S_ERASE;
 		}
 		else {
@@ -161,14 +162,6 @@ void Stage::UpdateMove()
 		for (int w = 0; w < WIDTH; w++) {
 			// 今の位置field[h][w].x, field[h][w].y
 			// 本来の位置 w*40, h*40
-#if 0
-			if (field[h][w].counter > 0/*本来の玉の位置と、今の位置がずれてたら*/) {
-				// 本来の位置に近づける
-				field[h][w].x += (w * 40 - field[h][w].x) / field[h][w].counter;
-				field[h][w].y += (h * 40 - field[h][w].y) / field[h][w].counter;
-				field[h][w].counter--;
-			}
-#else
 			auto& b = field[h][w];
 			if (b.rate < 1.0f) {
 				b.rate += 0.1f;
@@ -177,17 +170,36 @@ void Stage::UpdateMove()
 				b.x = GetRateValue(b.bx, w * 40, b.rate);
 				b.y = GetRateValue(b.by, h * 40, b.rate);
 			}
-#endif
 		}
 	}
 }
 
 void Stage::UpdateErase()
 {
+	eraseTime--;//これの初期化はEraseにstateが変わる直前でしてる
+	if (eraseTime <= 0) {
+		PrepareFall();
+		state = STATE::S_FALL;
+	}
 }
 
 void Stage::UpdateFall()
 {
+	// 滑らかに移動する演出
+	for (int h = 0; h < HEIGHT; h++) {
+		for (int w = 0; w < WIDTH; w++) {
+			// 今の位置field[h][w].x, field[h][w].y
+			// 本来の位置 w*40, h*40
+			auto& b = field[h][w];
+			if (b.rate < 1.0f) {
+				b.rate += 0.1f;
+				if (b.rate > 1.0f)
+					b.rate = 1.0f;
+				b.x = GetRateValue(b.bx, w * 40, b.rate);
+				b.y = GetRateValue(b.by, h * 40, b.rate);
+			}
+		}
+	}
 }
 
 void Stage::UpdateAttack()
@@ -243,3 +255,23 @@ bool Stage::CheckErase()
 	return ret;
 }
 
+void Stage::PrepareFall()
+{
+
+	for (int w = 0; w < WIDTH; w++) {
+		int hole = 0;
+		for (int h = HEIGHT - 1; h >= 0; h--) {//下から見る逆for文
+			if (field[h][w].doErase > 0) {
+				hole += 1;
+			}
+			else {
+				//field[h][w]をholeの数落下させる
+				field[h + hole][w] = field[h][w];//その玉を穴(その列で何個消えたか)の数下に配置する
+				field[h + hole][w].by = field[h][w].y;
+				field[h + hole][w].bx = field[h][w].x;
+				field[h + hole][w].rate = 0.0f;
+			}
+
+		}
+	}
+}
