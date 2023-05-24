@@ -37,12 +37,12 @@ Stage::~Stage()
 
 void Stage::Initialize()
 {
-	hImage[COLOR::RED] = Image::Load("ball0.png");
-	hImage[COLOR::BLUE] = Image::Load("ball1.png");
-	hImage[COLOR::YELLOW] = Image::Load("ball2.png");
-	hImage[COLOR::GREEN] = Image::Load("ball3.png");
-	hImage[COLOR::PURPLE] = Image::Load("ball4.png");
-	hImage[COLOR::HEART] = Image::Load("ball5.png");
+	for (int i = 0; i < COLOR::NUM; i++) {	
+		
+		std::string filename = "ball";
+		filename+= std::to_string(i)+ ".png";
+		hImage[i] = Image::Load(filename);
+	}
 	state = STATE::S_IDLE;
 }
 
@@ -149,6 +149,9 @@ void Stage::UpdateMove()
 #endif
 	}
 	if (Input::IsMouseButtonUp(0)) { // 左クリック
+			selectColor = COLOR::NOCOLOR;
+			selectX = -1;
+			selectY = -1;
 		if (CheckErase()) {
 			eraseTime = 30;
 			state = STATE::S_ERASE;
@@ -200,6 +203,22 @@ void Stage::UpdateFall()
 			}
 		}
 	}
+
+	for (int h = 0; h < HEIGHT; h++) {
+		for (int w = 0; w < WIDTH; w++) {
+			if (field[h][w].rate < 1.0) {
+				return;
+			}
+		}
+	}
+	if (CheckErase()) {
+		eraseTime = 30;
+		state = STATE::S_ERASE;
+	}
+	else {
+		state = STATE::S_IDLE;
+	}
+
 }
 
 void Stage::UpdateAttack()
@@ -270,6 +289,18 @@ void Stage::PrepareFall()
 				field[h + hole][w].by = field[h][w].y;
 				field[h + hole][w].bx = field[h][w].x;
 				field[h + hole][w].rate = 0.0f;
+			}
+			//球を補充する
+			for (int b = 0; b < hole; b++) {
+				field[b][w].color   = (COLOR)(rand() % COLOR::NUM);
+				field[b][w].rate    = 0.0f;
+				field[b][w].doErase = 0;
+
+				field[b][w].x  = w * 40;
+				field[b][w].bx = w * 40;
+
+				field[b][w].y  = (-hole + b ) * 40;
+				field[b][w].by = (-hole + b) * 40;
 			}
 
 		}

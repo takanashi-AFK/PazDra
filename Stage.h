@@ -15,10 +15,10 @@ private:
 		NOCOLOR = -1,
 		RED = 0,
 		BLUE,
-		YELLOW,
+		/*YELLOW,
 		GREEN,
 		PURPLE,
-		HEART,
+		HEART,*/
 		NUM
 	};
 
